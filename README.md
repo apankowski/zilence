@@ -14,7 +14,7 @@ It does so by:
 This extension was tested with:
 
 * GNOME Shell versions: 3.36 and 3.38,
-* Zoom Client for Linux versions: 5.4.2 and 5.4.9.
+* Zoom Client for Linux versions: 5.4.2, 5.4.9, 5.9.0.
 
 However, it may work with older versions as well.
 
