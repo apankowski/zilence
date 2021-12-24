@@ -19,82 +19,80 @@
  */
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const notifications = Me.imports.notifications;
+const Notifications = Me.imports.notifications.Notifications;
 
-class Extension {
+let active;
+let notifications;
+let windowCreatedHandlerId;
 
-    constructor(uuid) {
-        this._uuid = uuid;
-    }
+function init() {
+}
 
-    enable() {
-        this._active = false;
-        this._notifications = new notifications.Notifications();
-        this._windowCreatedHandlerId = global.display.connect('window-created', this._onWindowCreated.bind(this));
+function enable() {
+    active = false;
+    notifications = new Notifications();
+    windowCreatedHandlerId = global.display.connect('window-created', _onWindowCreated.bind(this));
 
-        // Activate the extension if Zoom window already exists
-        global.get_window_actors()
-            .map(app => app.metaWindow)
-            .forEach(this._processWindow);
-    }
+    // Activate the extension if Zoom window already exists
+    global.get_window_actors()
+        .map(app => app.metaWindow)
+        .forEach(_processWindow);
+}
 
-    disable() {
-        this._deactivate();
-        global.display.disconnect(this._windowCreatedHandlerId);
-        this._notifications.dispose();
-    }
+function disable() {
+    _deactivate();
+    global.display.disconnect(windowCreatedHandlerId);
+    windowCreatedHandlerId = null;
+    notifications.dispose();
+    notifications = null;
+}
 
-    _isZoomScreenSharingToolbar(w) {
-        return w.get_wm_class() === "zoom" && w.get_title() === "as_toolbar";
-    }
+function _onWindowCreated(d, w) {
+    _processWindow(w);
+}
 
-    _onWindowCreated(d, w) {
-        this._processWindow(w);
-    }
-
-    _processWindow(w) {
-        if (this._isZoomScreenSharingToolbar(w)) {
-            log("[Zilence] Screen sharing window detected, wmclass: " + w.get_wm_class() + " title: " + w.get_title());
-            w.connect('unmanaged', this._onWindowUnmanaged.bind(this));
-            this._activate();
-        }
-    }
-
-    _onWindowUnmanaged(w) {
-        log("[Zilence] Screen sharing window disappeared, wmclass: " + w.get_wm_class() + " title: " + w.get_title());
-        this._deactivate();
-    }
-
-    _activate() {
-        if (!this._active) {
-            if (!this._notifications.areEnabled()) {
-                log("[Zilence] Notifications are disabled - not activating");
-                return;
-            }
-            this._active = true;
-            log("[Zilence] Disabling notifications");
-            this._notifications.disable();
-            this._notifications.onEnabledChanged(() => {
-                if (this._notifications.areEnabled()) {
-                    log("[Zilence] Notifications enabled externally - deactivating");
-                }
-                this._deactivate(false);
-            });
-        }
-    }
-
-    _deactivate(enableNotifications = true) {
-        if (this._active) {
-            this._notifications.disconnectAll();
-            if (enableNotifications) {
-                log("[Zilence] Enabling notifications");
-                this._notifications.enable();
-            }
-            this._active = false;
-        }
+function _processWindow(w) {
+    if (_isZoomScreenSharingToolbar(w)) {
+        log("[Zilence] Screen sharing window detected, wmclass: " + w.get_wm_class() + " title: " + w.get_title());
+        w.connect('unmanaged', _onWindowUnmanaged.bind(this));
+        _activate();
     }
 }
 
-function init(metadata) {
-    return new Extension(metadata.uuid);
+function _isZoomScreenSharingToolbar(w) {
+    return w.get_wm_class() === "zoom" && w.get_title() === "as_toolbar";
+}
+
+function _onWindowUnmanaged(w) {
+    log("[Zilence] Screen sharing window disappeared, wmclass: " + w.get_wm_class() + " title: " + w.get_title());
+    _deactivate();
+}
+
+function _activate() {
+    if (!active) {
+        if (!notifications.areEnabled()) {
+            log("[Zilence] Notifications are disabled - not activating");
+            return;
+        }
+        active = true;
+        log("[Zilence] Disabling notifications");
+        notifications.disable();
+        notifications.onEnabledChanged(() => {
+            if (notifications.areEnabled()) {
+                log("[Zilence] Notifications enabled externally - deactivating");
+            }
+            _deactivate(false);
+        });
+    }
+}
+
+function _deactivate(enableNotifications = true) {
+    if (active) {
+        notifications.disconnectAll();
+        if (enableNotifications) {
+            log("[Zilence] Enabling notifications");
+            notifications.enable();
+        }
+        active = false;
+    }
 }

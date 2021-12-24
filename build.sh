@@ -6,7 +6,7 @@ COMMIT=$(git rev-parse HEAD)
 
 rm -rf .build
 mkdir .build
-cp -r metadata.json *.js README.md LICENSE .build/
+cp -r metadata.json *.js README.md LICENSE assets/ .build/
 
 cd .build
 jq ". + {commit: \"$COMMIT\"}" metadata.json > temp && mv temp metadata.json

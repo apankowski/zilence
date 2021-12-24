@@ -1,6 +1,8 @@
 # Zilence
 
-Zilence is a Gnome Shell extension turning off notifications while sharing screen during a Zoom call.
+![logo](assets/logo.png)
+
+Zilence is a GNOME Shell extension turning off notifications while sharing screen during a Zoom call.
 
 It does so by:
 
@@ -9,9 +11,28 @@ It does so by:
 
 ## Compatibility
 
-This extension is compatible with Gnome Shell 3.36+.
+This extension was tested with:
 
-It has been tested with versions 5.4.2 and 5.4.9 of the Zoom Client for Linux. However, it might work with older Zoom Client versions as well.
+* GNOME Shell versions: 3.36 and 3.38,
+* Zoom Client for Linux versions: 5.4.2, 5.4.9, 5.9.0.
+
+However, it may work with older versions as well.
+
+## Reporting issues
+
+Please report issues [on GitHub](https://github.com/apankowski/zilence/issues), providing:
+
+* OS version (can be found in _Settings_ → _About_ → _OS Name_ and _OS Type_),
+* GNOME version (can be found in _Settings_ → _About_ → _GNOME Version_),
+* Zoom client version (can be found in _Zoom menu_ → _Help_ → _About Zoom_)
+
+and attaching extension logs since last boot:
+
+```bash
+journalctl -b | grep -i zilence > zilence.log
+```
+
+(the command above will save logs in `zilence.log` file).
 
 ## Building
 

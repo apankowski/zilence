@@ -4,5 +4,5 @@
   "description": "Turns off notifications while sharing screen during a Zoom call",
   "shell-version": ["3.36", "3.38"],
   "url": "https://github.com/apankowski/zilence",
-  "version": 1
+  "version": 2
 }
