@@ -13,8 +13,8 @@ It does so by:
 
 This extension was tested with:
 
-* GNOME Shell versions: 3.36 and 3.38,
-* Zoom Client for Linux versions: 5.4.2, 5.4.9, 5.9.0.
+* GNOME Shell versions: 3.36, 3.38, 40;
+* Zoom Client for Linux versions: 5.4.2, 5.4.9, 5.9.0, 5.9.1.
 
 However, it may work with older versions as well.
 
