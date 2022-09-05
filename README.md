@@ -1,5 +1,5 @@
 <div align="center">
-<img src="./assets/logo.png" alt="Logo" style="width: 300px; border-radius: 50%" />
+<img src="./assets/logo.png" alt="Logo" style="width: 300px" />
 <h1>Zilence</h1>
 </div>
 
