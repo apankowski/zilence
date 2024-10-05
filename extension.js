@@ -1,6 +1,6 @@
 /*
  * Zilence extension for Gnome Shell.
- * Copyright 2021-2022 Andrzej Pańkowski
+ * Copyright 2021-2024 Andrzej Pańkowski
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,81 +18,78 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Notifications = Me.imports.notifications.Notifications;
+import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js'
+import { zLog, zDebug } from './utils.js'
+import { Zoom } from './zoom.js'
+import { Notifications } from './notifications.js'
 
-let active;
-let notifications;
-let windowCreatedHandlerId;
+export default class ZilenceExtension extends Extension {
 
-function init() {
-}
-
-function enable() {
-    active = false;
-    notifications = new Notifications();
-    windowCreatedHandlerId = global.display.connect('window-created', _onWindowCreated.bind(this));
-
-    // Activate the extension if Zoom window already exists
-    global.get_window_actors()
-        .map(app => app.metaWindow)
-        .forEach(_processWindow);
-}
-
-function disable() {
-    _deactivate();
-    global.display.disconnect(windowCreatedHandlerId);
-    windowCreatedHandlerId = null;
-    notifications.dispose();
-    notifications = null;
-}
-
-function _onWindowCreated(d, w) {
-    _processWindow(w);
-}
-
-function _processWindow(w) {
-    if (_isZoomScreenSharingToolbar(w)) {
-        log("[Zilence] Screen sharing window detected, wmclass: " + w.get_wm_class() + " title: " + w.get_title());
-        w.connect('unmanaged', _onWindowUnmanaged.bind(this));
-        _activate();
+    constructor(metadata) {
+        super(metadata)
+        this.enabled = false
+        this.zoom = null
+        this.notifications = null
+        this.active = false
     }
-}
 
-function _isZoomScreenSharingToolbar(w) {
-    return w.get_wm_class() === "zoom" && w.get_title() === "as_toolbar";
-}
+    enable() {
+        zDebug('Enabling extension')
+        if (!this.enabled) {
+            this.zoom = new Zoom()
+            this.notifications = new Notifications()
+            this.active = false
+            this.enabled = true
 
-function _onWindowUnmanaged(w) {
-    log("[Zilence] Screen sharing window disappeared, wmclass: " + w.get_wm_class() + " title: " + w.get_title());
-    _deactivate();
-}
-
-function _activate() {
-    if (!active) {
-        if (!notifications.areEnabled()) {
-            log("[Zilence] Notifications are disabled - not activating");
-            return;
+            this.zoom.enableScreenSharingTracking(() => this._activate(), () => this._deactivate())
+            zLog('Extension enabled')
+        } else {
+            zDebug('Extension was already enabled')
         }
-        active = true;
-        log("[Zilence] Disabling notifications");
-        notifications.disable();
-        notifications.onEnabledChanged(() => {
-            if (notifications.areEnabled()) {
-                log("[Zilence] Notifications enabled externally - deactivating");
+    }
+
+    disable() {
+        zLog('Disabling extension')
+        if (this.enabled) {
+            this._deactivate()
+            this.zoom.dispose()
+            this.zoom = null
+            this.notifications.dispose()
+            this.notifications = null
+            this.active = false
+            this.enabled = false
+            zLog('Extension disabled')
+        } else {
+            zDebug('Extension was already disabled')
+        }
+    }
+
+    _activate() {
+        if (!this.active) {
+            if (!this.notifications.areEnabled()) {
+                zLog('Notifications are disabled - not activating')
+                return
             }
-            _deactivate(false);
-        });
-    }
-}
-
-function _deactivate(enableNotifications = true) {
-    if (active) {
-        notifications.disconnectAll();
-        if (enableNotifications) {
-            log("[Zilence] Enabling notifications");
-            notifications.enable();
+            this.active = true
+            zLog('Disabling notifications')
+            this.notifications.disable()
+            this.notifications.enableChangeTracking(() => {
+                if (this.notifications.areEnabled()) {
+                    zLog('Notifications enabled externally - deactivating')
+                }
+                this._deactivate(false)
+            })
         }
-        active = false;
+    }
+
+    _deactivate(enableNotifications = true) {
+        if (this.active) {
+            this.notifications.disableChangeTracking()
+            if (enableNotifications) {
+                zLog('Enabling notifications')
+                this.notifications.enable()
+            }
+            this.active = false
+        }
     }
 }

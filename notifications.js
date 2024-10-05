@@ -1,6 +1,6 @@
 /*
  * Zilence extension for Gnome Shell.
- * Copyright 2021-2022 Andrzej Pańkowski
+ * Copyright 2021-2024 Andrzej Pańkowski
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,42 +18,43 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-const Gio = imports.gi.Gio;
+import Gio from "gi://Gio"
 
-var Notifications = class {
+export const Notifications = class {
 
     constructor() {
-        this.connections = [];
-        this._settings = new Gio.Settings({ schema_id: 'org.gnome.desktop.notifications' });
-    }
-
-    enable() {
-        this._settings.set_boolean('show-banners', true);
-    }
-
-    disable() {
-        this._settings.set_boolean('show-banners', false);
+        this.settings = new Gio.Settings({ schema_id: 'org.gnome.desktop.notifications' })
+        this.settingChangedSignal = null
     }
 
     areEnabled() {
-        return this._settings.get_boolean('show-banners');
+        return this.settings.get_boolean('show-banners')
     }
 
-    onEnabledChanged(callback) {
-        let id = this._settings.connect('changed::show-banners', callback);
-        this.connections.push(id);
+    enable() {
+        this.settings.set_boolean('show-banners', true)
     }
 
-    disconnectAll() {
-        this.connections.forEach((id) => {
-            this._settings.disconnect(id);
-        });
-        this.connections = [];
+    disable() {
+        this.settings.set_boolean('show-banners', false)
+    }
+
+    enableChangeTracking(callback) {
+        this.disableChangeTracking()
+        this.settingChangedSignal = this.settings.connect('changed::show-banners', () => callback())
+        // GSettings require reading the setting to receive its corresponding 'changed' signal
+        this.areEnabled()
+    }
+
+    disableChangeTracking() {
+        if (this.settingChangedSignal) {
+            this.settings.disconnect(this.settingChangedSignal)
+            this.settingChangedSignal = null
+        }
     }
 
     dispose() {
-        this.disconnectAll();
-        this._settings.run_dispose();
-        this._settings = null;
+        this.disableChangeTracking()
+        this.settings = null
     }
 }

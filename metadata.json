@@ -2,7 +2,7 @@
   "uuid": "zilence@apankowski.github.com",
   "name": "Zilence",
   "description": "Turns off notifications while sharing screen during a Zoom call",
-  "shell-version": ["3.36", "3.38", "40", "42", "44"],
+  "shell-version": ["45", "46"],
   "url": "https://github.com/apankowski/zilence",
-  "version": 5
+  "version": 6
 }
