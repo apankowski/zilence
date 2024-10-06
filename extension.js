@@ -27,7 +27,6 @@ export default class ZilenceExtension extends Extension {
 
     constructor(metadata) {
         super(metadata)
-        this.enabled = false
         this.zoom = null
         this.notifications = null
         this.active = false
@@ -35,33 +34,22 @@ export default class ZilenceExtension extends Extension {
 
     enable() {
         zDebug('Enabling extension')
-        if (!this.enabled) {
-            this.zoom = new Zoom()
-            this.notifications = new Notifications()
-            this.active = false
-            this.enabled = true
-
-            this.zoom.enableScreenSharingTracking(() => this._activate(), () => this._deactivate())
-            zLog('Extension enabled')
-        } else {
-            zDebug('Extension was already enabled')
-        }
+        this.zoom = new Zoom()
+        this.notifications = new Notifications()
+        this.active = false
+        this.zoom.enableScreenSharingTracking(() => this._activate(), () => this._deactivate())
+        zLog('Extension enabled')
     }
 
     disable() {
         zLog('Disabling extension')
-        if (this.enabled) {
-            this._deactivate()
-            this.zoom.dispose()
-            this.zoom = null
-            this.notifications.dispose()
-            this.notifications = null
-            this.active = false
-            this.enabled = false
-            zLog('Extension disabled')
-        } else {
-            zDebug('Extension was already disabled')
-        }
+        this._deactivate()
+        this.zoom.dispose()
+        this.zoom = null
+        this.notifications.dispose()
+        this.notifications = null
+        this.active = false
+        zLog('Extension disabled')
     }
 
     _activate() {
